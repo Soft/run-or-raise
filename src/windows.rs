@@ -1,4 +1,4 @@
-use xcb;
+use xcb::{self, Connection, Screen, Window, Atom};
 use std::sync::Mutex;
 use std::collections::HashMap;
 use encoding::{Encoding, DecoderTrap};
@@ -8,21 +8,19 @@ use conditions::Condition;
 const XCB_EWMH_CLIENT_SOURCE_TYPE_OTHER: u32 = 2;
 
 lazy_static! {
-    static ref INTERNED_ATOMS: Mutex<HashMap<&'static str, xcb::Atom>> = {
+    static ref INTERNED_ATOMS: Mutex<HashMap<&'static str, Atom>> = {
         let m = HashMap::new();
         Mutex::new(m)
     };
 }
 
 pub struct WindowTreeIter<'a> {
-    pub conn: &'a xcb::Connection,
-    pub stack: Vec<xcb::Window>,
+    pub conn: &'a Connection,
+    pub stack: Vec<Window>,
 }
 
 impl<'a> WindowTreeIter<'a> {
-    fn new(conn: &'a xcb::Connection,
-           win: xcb::Window)
-           -> Result<WindowTreeIter<'a>, xcb::GenericError> {
+    fn new(conn: &'a Connection, win: Window) -> Result<WindowTreeIter<'a>, xcb::GenericError> {
         let reply = try!(xcb::query_tree(conn, win).get_reply());
         Ok(WindowTreeIter {
             conn: conn,
@@ -32,7 +30,7 @@ impl<'a> WindowTreeIter<'a> {
 }
 
 impl<'a> Iterator for WindowTreeIter<'a> {
-    type Item = Result<xcb::Window, xcb::GenericError>;
+    type Item = Result<Window, xcb::GenericError>;
     fn next(&mut self) -> Option<Self::Item> {
         self.stack.pop().map(|top| {
             xcb::query_tree(self.conn, top).get_reply().map(|reply| {
@@ -43,7 +41,7 @@ impl<'a> Iterator for WindowTreeIter<'a> {
     }
 }
 
-pub fn get_atom(conn: &xcb::Connection, atom: &'static str) -> xcb::Atom {
+pub fn get_atom(conn: &Connection, atom: &'static str) -> Atom {
     let current = {
         INTERNED_ATOMS.lock().unwrap().get(atom).cloned()
     };
@@ -54,7 +52,7 @@ pub fn get_atom(conn: &xcb::Connection, atom: &'static str) -> xcb::Atom {
     })
 }
 
-pub fn set_active_window(conn: &xcb::Connection, screen: &xcb::Screen, win: xcb::Window) {
+pub fn set_active_window(conn: &Connection, screen: &Screen, win: Window) {
     let net_active_window = get_atom(conn, "_NET_ACTIVE_WINDOW");
     let data = xcb::ClientMessageData::from_data32([XCB_EWMH_CLIENT_SOURCE_TYPE_OTHER,
                                                     xcb::CURRENT_TIME,
@@ -69,10 +67,7 @@ pub fn set_active_window(conn: &xcb::Connection, screen: &xcb::Screen, win: xcb:
                     &ev);
 }
 
-pub fn get_string_property(conn: &xcb::Connection,
-                           window: xcb::Window,
-                           prop: xcb::Atom)
-                           -> Option<String> {
+pub fn get_string_property(conn: &Connection, window: Window, prop: Atom) -> Option<String> {
     let reply = match xcb::get_property(conn,
                                         false,
                                         window,
@@ -95,7 +90,7 @@ pub fn get_string_property(conn: &xcb::Connection,
     }
 }
 
-pub fn is_regular_window(conn: &xcb::Connection, window: xcb::Window) -> bool {
+pub fn is_regular_window(conn: &Connection, window: Window) -> bool {
     let atom_wm_state = get_atom(conn, "WM_STATE");
     xcb::get_property(conn,
                       false,
@@ -109,10 +104,10 @@ pub fn is_regular_window(conn: &xcb::Connection, window: xcb::Window) -> bool {
         .unwrap_or(false)
 }
 
-pub fn find_matching_window(conn: &xcb::Connection,
-                            screen: &xcb::Screen,
+pub fn find_matching_window(conn: &Connection,
+                            screen: &Screen,
                             cond: &Condition)
-                            -> Result<Option<xcb::Window>, xcb::GenericError> {
+                            -> Result<Option<Window>, xcb::GenericError> {
     let wins = try!(WindowTreeIter::new(&conn, screen.root()));
     for w in wins {
         let w = try!(w);

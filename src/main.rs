@@ -15,7 +15,6 @@ use std::env;
 use std::process::Command;
 use std::os::unix::process::CommandExt;
 use xcb::Connection;
-use nom::IResult;
 
 fn exec_program(prog: &str, args: &[String]) -> ! {
     Command::new(prog).args(args).exec();
@@ -23,22 +22,23 @@ fn exec_program(prog: &str, args: &[String]) -> ! {
 }
 
 fn print_usage(prog: &str) -> ! {
-    println!("{} PATTERN PROGRAM [ARGS...]", prog);
+    println!("{} CONDITION PROGRAM [ARGS...]", prog);
     std::process::exit(1);
 }
 
 fn main() {
     let args: Vec<_> = env::args().collect();
+    let app = &args[0];
 
-    let (pattern, prog, prog_args) = if args.len() >= 3 {
+    let (condition, prog, prog_args) = if args.len() >= 3 {
         (&args[1], &args[2], &args[3..])
     } else {
-        print_usage(&args[0]);
+        print_usage(app);
     };
 
-    let cond = match parsing::condition(pattern) {
-        IResult::Done("", a) => a,
-        _ => print_usage(&args[0]),
+    let cond = match condition.parse() {
+        Ok(cond) => cond,
+        _ => print_usage(app),
     };
 
     let (conn, screen_num) = Connection::connect(None).expect("Cannot open display");

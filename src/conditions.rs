@@ -1,5 +1,5 @@
 use regex::Regex;
-use xcb::{Connection, Window, ATOM_WM_NAME, ATOM_WM_CLASS};
+use xcb::{self, Connection, Window};
 use windows::{get_string_property, get_atom};
 
 #[derive(Debug,PartialEq)]
@@ -12,7 +12,13 @@ pub enum Property {
 #[derive(Debug)]
 pub struct Match {
     pub prop: Property,
-    pub pattern: Regex,
+    pub op: Operator,
+}
+
+#[derive(Debug)]
+pub enum Operator {
+    Regex(Regex),
+    Equal(String),
 }
 
 #[derive(Debug)]
@@ -27,12 +33,12 @@ impl Property {
     pub fn from_window(&self, conn: &Connection, win: Window) -> Option<String> {
         match *self {
             Property::Class => {
-                get_string_property(conn, win, ATOM_WM_CLASS)
+                get_string_property(conn, win, xcb::ATOM_WM_CLASS)
                     .map(|p| p.split('\u{0}').nth(1).unwrap().to_owned())
             }
             Property::Name => {
                 get_string_property(conn, win, get_atom(conn, "_NET_WM_NAME"))
-                    .or(get_string_property(conn, win, ATOM_WM_NAME))
+                    .or(get_string_property(conn, win, xcb::ATOM_WM_NAME))
             }
             Property::Role => get_string_property(conn, win, get_atom(conn, "WM_WINDOW_ROLE")),
         }
@@ -41,7 +47,15 @@ impl Property {
 
 impl Match {
     pub fn matches(&self, conn: &Connection, win: Window) -> bool {
-        self.prop.from_window(conn, win).map(|p| self.pattern.is_match(&p)).unwrap_or(false)
+        self.prop
+            .from_window(conn, win)
+            .map(|p| {
+                match self.op {
+                    Operator::Regex(ref pattern) => pattern.is_match(&p),
+                    Operator::Equal(ref value) => value == &p,
+                }
+            })
+            .unwrap_or(false)
     }
 }
 

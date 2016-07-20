@@ -1,9 +1,10 @@
 use nom::{IResult, space};
+use std::str::FromStr;
 use regex::Regex;
 
 use conditions::*;
 
-named!(pub property<&str, Property>,
+named!(property<&str, Property>,
        alt_complete!(value!(Property::Class, tag_s!("class"))
                | value!(Property::Name, tag_s!("name"))
                | value!(Property::Role, tag_s!("role"))));
@@ -23,7 +24,7 @@ named!(string_content<&str, String>,
             res
         }));
 
-named!(pub quoted_string<&str, String>,
+named!(quoted_string<&str, String>,
     chain!(tag_s!("\"")
             ~ s: string_content
             ~ tag_s!("\""),
@@ -31,15 +32,25 @@ named!(pub quoted_string<&str, String>,
 
 named!(ws<&str, ()>, value!((), many0!(space)));
 
-named!(pub match_<&str, Match>,
-    chain!(p: property
-            ~ ws
-            ~ tag_s!("=")
-            ~ ws
-            ~ r: map_res!(quoted_string, |s: String| { Regex::new(&s) }),
-        || Match { prop: p, pattern: r }));
+named!(op_equal<&str, Operator>,
+       chain!(tag_s!("=")
+              ~ ws
+              ~ s: quoted_string,
+       || Operator::Equal(s)));
 
-named!(pub condition<&str, Condition>,
+named!(op_regex<&str, Operator>,
+       chain!(tag_s!("~")
+              ~ ws
+              ~ r: map_res!(quoted_string, |s: String| Regex::new(&s)),
+       || Operator::Regex(r)));
+
+named!(match_<&str, Match>,
+    chain!(p: property
+           ~ ws
+           ~ op: alt_complete!(op_equal | op_regex),
+        || Match { prop: p, op: op }));
+
+named!(condition<&str, Condition>,
     chain!(l: cond_and
             ~ r: many0!(chain!(ws ~ tag_s!("||") ~ ws ~ c:cond_and, || c)),
         || r.into_iter().fold(l, |acc, x| Condition::Or(Box::new(acc), Box::new(x)))));
@@ -60,38 +71,58 @@ named!(cond_not<&str, Condition>,
 
 named!(cond_pure<&str, Condition>, map!(match_, Condition::Pure));
 
+impl FromStr for Condition {
+    type Err = (); // Bad
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match condition(s) {
+            IResult::Done(_, cond) => Ok(cond),
+            _ => Err(())
+        }
+    }
+}
+
 #[test]
 fn test_property() {
-    assert_eq!(property("class"), IResult::Done(&""[..], Property::Class));
-    assert_eq!(property("name"), IResult::Done(&""[..], Property::Name));
-    assert_eq!(property("role"), IResult::Done(&""[..], Property::Role));
+    use nom::IResult::Done;
+    assert_eq!(property("class"), Done(&""[..], Property::Class));
+    assert_eq!(property("name"), Done(&""[..], Property::Name));
+    assert_eq!(property("role"), Done(&""[..], Property::Role));
 }
 
 #[test]
 fn test_escape() {
-    assert_eq!(escape("\\\""), IResult::Done(&""[..], "\""));
-    assert_eq!(escape("\\\\"), IResult::Done(&""[..], "\\"));
+    use nom::IResult::Done;
+    assert_eq!(escape("\\\""), Done(&""[..], "\""));
+    assert_eq!(escape("\\\\"), Done(&""[..], "\\"));
 }
 
 #[test]
 fn test_no_escapes() {
-    assert_eq!(no_escapes("Hello \\"), IResult::Done("\\", "Hello "));
-    assert_eq!(no_escapes("Hello \""), IResult::Done("\"", "Hello "));
+    use nom::IResult::Done;
+    assert_eq!(no_escapes("Hello \\"), Done("\\", "Hello "));
+    assert_eq!(no_escapes("Hello \""), Done("\"", "Hello "));
 }
 
 #[test]
 fn test_quoted_string() {
+    use nom::IResult::Done;
     assert_eq!(quoted_string("\"Hello World\""),
-               IResult::Done(&""[..], "Hello World".to_owned()));
+               Done(&""[..], "Hello World".to_owned()));
     assert_eq!(quoted_string(r#""Hello \"World\"""#),
-               IResult::Done(&""[..], "Hello \"World\"".to_owned()));
+               Done(&""[..], "Hello \"World\"".to_owned()));
 }
 
 #[test]
 fn test_match_() {
-    if let IResult::Done(_, m) = match_("class = \"Firefox\"") {
+    use nom::IResult::Done;
+    if let Done(_, m) = match_("class ~ \"Firefox\"") {
         assert_eq!(m.prop, Property::Class);
-        assert!(m.pattern.is_match("Firefox"));
+        if let Operator::Regex(ref p) = m.op {
+            assert!(p.is_match("Firefox"));
+        } else {
+            panic!();
+        }
     } else {
         panic!();
     }
