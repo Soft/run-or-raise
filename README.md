@@ -5,6 +5,13 @@ windows if they are already running. In more general terms, `run-or-raise` tries
 to find matching windows using simple expressions and if no matching windows are
 found, it executes a specified program.
 
+## Installation
+
+The latest version of `run-or-raise` can be easily installed using
+[Cargo](https://crates.io)
+
+	cargo install --git 'https://bitbucket.org/Soft/run-or-raise.git'
+
 ## Usage
 
 	run-or-raise CONDITION PROGRAM [ARGS...]
