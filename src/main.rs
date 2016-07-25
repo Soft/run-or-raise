@@ -1,6 +1,7 @@
 extern crate xcb;
 extern crate regex;
 extern crate encoding;
+extern crate termion;
 
 #[macro_use]
 extern crate nom;
@@ -10,20 +11,21 @@ extern crate lazy_static;
 mod parsing;
 mod windows;
 mod conditions;
+mod utils;
 
 use std::env;
 use std::process::Command;
 use std::os::unix::process::CommandExt;
 use xcb::Connection;
+use utils::{Failure, CouldFail, display_error};
 
 fn exec_program(prog: &str, args: &[String]) -> ! {
     Command::new(prog).args(args).exec();
-    panic!()
+    display_error(format!("Could not execute program \"{}\"", prog).as_ref())
 }
 
 fn print_usage(prog: &str) -> ! {
-    println!("{} CONDITION PROGRAM [ARGS...]", prog);
-    std::process::exit(1);
+    display_error(Failure::new(&format!("{} CONDITION PROGRAM [ARGS...]", prog)).prefix("usage"));
 }
 
 fn main() {
@@ -41,7 +43,7 @@ fn main() {
         _ => print_usage(app),
     };
 
-    let (conn, screen_num) = Connection::connect(None).expect("Cannot open display");
+    let (conn, screen_num) = Connection::connect(None).unwrap_or_error("Cannot open display");
     let screen = conn.get_setup().roots().nth(screen_num as usize).unwrap();
 
     match windows::find_matching_window(&conn, &screen, &cond) {
@@ -49,7 +51,7 @@ fn main() {
             windows::set_active_window(&conn, &screen, win);
         }
         Ok(None) => exec_program(prog, prog_args),
-        Err(_) => panic!(),
+        Err(_) => display_error("Could not access windows"),
     }
     conn.flush();
 }

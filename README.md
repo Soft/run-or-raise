@@ -9,8 +9,8 @@ found, it executes a specified program.
 
 	run-or-raise CONDITION PROGRAM [ARGS...]
 
-Operators in matching expressions are left-associative and ! (not) binds
-stronger than && (and) which, in turn, binds stronger than || (or). Possible
+Operators in matching expressions are left-associative and `!` (not) binds
+stronger than `&&` (and) which, in turn, binds stronger than `||` (or). Possible
 properties are `class`, `name`, and `role`. If multiple windows match the
 criteria, the first matching window is selected.
 
@@ -31,7 +31,7 @@ criteria, the first matching window is selected.
 [xbindkeys](http://www.nongnu.org/xbindkeys/) is an application for launching
 programs based on key events. `run-or-raise` can be combined with it to only
 launch applications if they are not already running. For example, to launch or
-focus Firefox by pressing Shift+Mod4+b, you could use the following `xbindkeys`
+focus Firefox by pressing `Shift+Mod4+b`, you could use the following `xbindkeys`
 configuration:
 
 	"run-or-raise 'role = \"browser\"' firefox"

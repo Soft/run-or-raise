@@ -77,7 +77,7 @@ impl FromStr for Condition {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match condition(s) {
             IResult::Done(_, cond) => Ok(cond),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }

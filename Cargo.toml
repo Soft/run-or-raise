@@ -1,12 +1,13 @@
 [package]
 authors = ["Samuel Laurén <samuel.lauren@iki.fi>"]
+license = "GPL-3.0"
 name = "run-or-raise"
 version = "0.1.0"
-license = "GPL-3.0"
 
 [dependencies]
 encoding = "0.2.32"
 lazy_static = "0.2.1"
 nom = "1.2.3"
 regex = "0.1.73"
+termion = "1.0.3"
 xcb = "0.7.4"
