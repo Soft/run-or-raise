@@ -30,9 +30,9 @@ impl<'a, 'm> Failure<'a, 'm> {
     }
 }
 
-impl<'a> From<&'a str> for Failure<'a, 'static> {
-    fn from(msg: &'a str) -> Self {
-        Failure::new(msg)
+impl<'a, T: ?Sized> From<&'a T> for Failure<'a, 'static> where T: AsRef<str> {
+    fn from(msg: &'a T) -> Self {
+        Failure::new(msg.as_ref())
     }
 }
 

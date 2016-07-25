@@ -21,7 +21,7 @@ use utils::{Failure, CouldFail, display_error};
 
 fn exec_program(prog: &str, args: &[String]) -> ! {
     Command::new(prog).args(args).exec();
-    display_error(format!("Could not execute program \"{}\"", prog).as_ref())
+    display_error(&format!("Could not execute program \"{}\"", prog))
 }
 
 fn print_usage(prog: &str) -> ! {

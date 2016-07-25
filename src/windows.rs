@@ -8,10 +8,7 @@ use conditions::Condition;
 const XCB_EWMH_CLIENT_SOURCE_TYPE_OTHER: u32 = 2;
 
 lazy_static! {
-    static ref INTERNED_ATOMS: Mutex<HashMap<&'static str, Atom>> = {
-        let m = HashMap::new();
-        Mutex::new(m)
-    };
+    static ref INTERNED_ATOMS: Mutex<HashMap<&'static str, Atom>> = Mutex::new(HashMap::new());
 }
 
 pub struct WindowTreeIter<'a> {
