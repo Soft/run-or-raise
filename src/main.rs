@@ -24,10 +24,6 @@ fn exec_program(prog: &str, args: &[String]) -> ! {
     display_error(&format!("Could not execute program \"{}\"", prog))
 }
 
-fn print_usage(prog: &str) -> ! {
-    display_error(Failure::new(&format!("{} CONDITION PROGRAM [ARGS...]", prog)).prefix("usage"));
-}
-
 fn main() {
     let args: Vec<_> = env::args().collect();
     let app = &args[0];
@@ -35,23 +31,19 @@ fn main() {
     let (condition, prog, prog_args) = if args.len() >= 3 {
         (&args[1], &args[2], &args[3..])
     } else {
-        print_usage(app);
+        display_error(Failure::new(&format!("{} CONDITION PROGRAM [ARGS...]", app))
+                          .prefix("usage"));
     };
 
-    let cond = match condition.parse() {
-        Ok(cond) => cond,
-        _ => print_usage(app),
-    };
+    let cond = condition.parse().unwrap_or_error("Invalid condition");
 
     let (conn, screen_num) = Connection::connect(None).unwrap_or_error("Cannot open display");
     let screen = conn.get_setup().roots().nth(screen_num as usize).unwrap();
 
-    match windows::find_matching_window(&conn, &screen, &cond) {
-        Ok(Some(win)) => {
-            windows::set_active_window(&conn, &screen, win);
-        }
-        Ok(None) => exec_program(prog, prog_args),
-        Err(_) => display_error("Could not access windows"),
+    match windows::find_matching_window(&conn, &screen, &cond)
+              .unwrap_or_error("Could not access windows") {
+        Some(win) => windows::set_active_window(&conn, &screen, win),
+        None => exec_program(prog, prog_args),
     }
     conn.flush();
 }
