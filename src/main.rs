@@ -7,33 +7,33 @@ extern crate termion;
 extern crate nom;
 #[macro_use]
 extern crate lazy_static;
-#[macro_use]
-extern crate clap;
 
 mod parsing;
 mod windows;
 mod conditions;
 mod utils;
-mod cli;
 
+use std::env;
 use std::process::Command;
 use std::os::unix::process::CommandExt;
 use xcb::Connection;
-use utils::{CouldFail, display_error};
+use utils::{Failure, CouldFail, display_error};
 
-fn exec_program(prog: &str, args: &[&str]) -> ! {
+fn exec_program(prog: &str, args: &[String]) -> ! {
     Command::new(prog).args(args).exec();
     display_error(&format!("Could not execute program \"{}\"", prog))
 }
 
 fn main() {
-    let matches = cli::setup_command_line().get_matches();
+    let args: Vec<_> = env::args().collect();
+    let app = &args[0];
 
-    let condition = matches.value_of("condition").unwrap();
-    let prog = matches.value_of("command").unwrap();
-    let prog_args = matches.values_of("args")
-        .map(|v| v.collect())
-        .unwrap_or(vec![]);
+    let (condition, prog, prog_args) = if args.len() >= 3 {
+        (&args[1], &args[2], &args[3..])
+    } else {
+        display_error(Failure::new(&format!("{} CONDITION PROGRAM [ARGS...]", app))
+                          .prefix("usage"));
+    };
 
     let cond = condition.parse().unwrap_or_error("Invalid condition");
 
@@ -43,7 +43,7 @@ fn main() {
     match windows::find_matching_window(&conn, &screen, &cond)
               .unwrap_or_error("Could not access windows") {
         Some(win) => windows::set_active_window(&conn, &screen, win),
-        None => exec_program(prog, &prog_args as &[&str]),
+        None => exec_program(prog, prog_args),
     }
     conn.flush();
 }
