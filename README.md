@@ -7,7 +7,7 @@ found, it executes a specified program.
 
 ## Installation
 
-The latest version of `run-or-raise` can be easily installed using
+The latest version of `run-or-raise` can easily be installed using
 [Cargo](https://crates.io)
 
 	cargo install --git 'https://bitbucket.org/Soft/run-or-raise.git'
