@@ -1,8 +1,0 @@
-image: scorpil/rust:stable
-
-pipelines:
-  default:
-    - step:
-        script:
-          - echo "Building"; cargo build --release
-          - echo "Running tests"; cargo test
