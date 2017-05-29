@@ -25,49 +25,64 @@ named!(string_content<&str, String>,
         }));
 
 named!(quoted_string<&str, String>,
-    chain!(tag_s!("\"")
-            ~ s: string_content
-            ~ tag_s!("\""),
-        || s));
+       do_parse!(tag_s!("\"") >>
+                 s: string_content >>
+                 tag_s!("\"") >>
+                 (s)));
 
 named!(ws<&str, ()>, value!((), many0!(space)));
 
 named!(op_equal<&str, Operator>,
-       chain!(tag_s!("=")
-              ~ ws
-              ~ s: quoted_string,
-       || Operator::Equal(s)));
+       do_parse!(tag_s!("=") >>
+                 ws >>
+                 s: quoted_string >>
+                 (Operator::Equal(s))));
 
 named!(op_regex<&str, Operator>,
-       chain!(tag_s!("~")
-              ~ ws
-              ~ r: map_res!(quoted_string, |s: String| Regex::new(&s)),
-       || Operator::Regex(r)));
+       do_parse!(tag_s!("~") >>
+                 ws >>
+                 r: map_res!(quoted_string, |s: String| Regex::new(&s)) >>
+                 (Operator::Regex(r))));
 
 named!(match_<&str, Match>,
-    chain!(p: property
-           ~ ws
-           ~ op: alt_complete!(op_equal | op_regex),
-        || Match { prop: p, op: op }));
+       do_parse!(p: property >>
+                 ws >>
+                 op: alt_complete!(op_equal | op_regex) >>
+                 (Match { prop: p, op: op })));
 
 named!(condition<&str, Condition>,
-    chain!(l: cond_and
-            ~ r: many0!(chain!(ws ~ tag_s!("||") ~ ws ~ c:cond_and, || c)),
-        || r.into_iter().fold(l, |acc, x| Condition::Or(Box::new(acc), Box::new(x)))));
+       do_parse!(l: cond_and >>
+                 r: many0!(do_parse!(ws >>
+                                     tag_s!("||") >>
+                                     ws >>
+                                     c:cond_and >>
+                                     (c))) >>
+                 (r.into_iter().fold(l, |acc, x| Condition::Or(Box::new(acc), Box::new(x))))));
 
 named!(cond_and<&str, Condition>,
-    chain!(l: cond_not
-            ~ r: many0!(chain!(ws ~ tag_s!("&&") ~ ws ~ c:cond_not, || c)),
-        || r.into_iter().fold(l, |acc, x| Condition::And(Box::new(acc), Box::new(x)))));
+       do_parse!(l: cond_not >>
+                 r: many0!(do_parse!(ws >>
+                                     tag_s!("&&") >>
+                                     ws >>
+                                     c:cond_not >>
+                                     (c))) >>
+                 (r.into_iter().fold(l, |acc, x| Condition::And(Box::new(acc), Box::new(x))))));
 
 named!(cond_not<&str, Condition>,
-    chain!(nots: many0!(chain!(tag_s!("!") ~ ws, || ()))
-            ~ c: cond_pure,
-        || nots.into_iter().fold(c, |acc, _| Condition::Not(Box::new(acc)))));
+       do_parse!(nots: many0!(do_parse!(tag_s!("!") >>
+                                        ws >>
+                                        ())) >>
+                 c: cond_parens >>
+                 (nots.into_iter().fold(c, |acc, _| Condition::Not(Box::new(acc))))));
 
-// named!(cond_parens<&str, Condition>,
-//     alt_complete!(chain!(tag_s!("(") ~ ws ~ c: condition ~ ws ~ tag_s!(")"), || c)
-//             | cond_pure));
+named!(cond_parens<&str, Condition>,
+       alt_complete!(do_parse!(tag_s!("(") >>
+                               ws >>
+                               c: condition >>
+                               ws >>
+                               tag_s!(")") >>
+                               (c))
+                     | cond_pure));
 
 named!(cond_pure<&str, Condition>, map!(match_, Condition::Pure));
 
@@ -128,10 +143,12 @@ fn test_match_() {
     }
 }
 
-// #[test]
-// fn test_cond_or() {
-// let cond = condition("class = \"Firefox\" && name = \"Emacs\" && role = \"browser\"");
-// println!("{:?}", cond);
-// let cond = condition("( role = \"browser\" )");
-// println!("{:?}", cond);
-// }
+#[test]
+fn test_cond_or() {
+    let cond = condition("class = \"Firefox\" && name = \"Emacs\" && role = \"browser\"");
+    println!("{:#?}", cond);
+    let cond = condition("class = \"Firefox\" && (name = \"Emacs\" && role = \"browser\")");
+    println!("{:#?}", cond);
+    let cond = condition("( role = \"browser\" )");
+    println!("{:#?}", cond);
+}
