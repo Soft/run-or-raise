@@ -1,16 +1,18 @@
-# run-or-raise 🐸
+# run-or-raise 🔍
+
+[![Build Status](https://travis-ci.org/Soft/run-or-raise.svg?branch=master)](https://travis-ci.org/Soft/run-or-raise) [![Latest Version](https://img.shields.io/crates/v/run-or-raise.svg)](https://crates.io/crates/run-or-raise) [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 `run-or-raise` is an utility for launching applications or focusing their
-windows if they are already running. In more general terms, `run-or-raise` tries
-to find a matching window using simple expressions and, if no matching window
-exists, it executes a specified program.
+windows if they are already running. `run-or-raise` tries to find a matching
+window using simple expressions and focus it or, if no matching windows are
+found, execute a specified program.
 
 ## Installation
 
 The latest version of `run-or-raise` can easily be installed using
 [Cargo](https://crates.io)
 
-	cargo install --git 'https://bitbucket.org/Soft/run-or-raise.git'
+	cargo install run-or-raise
 
 ## Usage
 
