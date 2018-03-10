@@ -18,7 +18,7 @@ pub struct WindowTreeIter<'a> {
 
 impl<'a> WindowTreeIter<'a> {
     fn new(conn: &'a Connection, win: Window) -> Result<WindowTreeIter<'a>, xcb::GenericError> {
-        let reply = try!(xcb::query_tree(conn, win).get_reply());
+        let reply = xcb::query_tree(conn, win).get_reply()?;
         Ok(WindowTreeIter {
             conn: conn,
             stack: reply.children().to_owned(),
@@ -105,9 +105,9 @@ pub fn find_matching_window(conn: &Connection,
                             screen: &Screen,
                             cond: &Condition)
                             -> Result<Option<Window>, xcb::GenericError> {
-    let wins = try!(WindowTreeIter::new(&conn, screen.root()));
+    let wins = WindowTreeIter::new(&conn, screen.root())?;
     for w in wins {
-        let w = try!(w);
+        let w = w?;
         if is_regular_window(conn, w) && cond.matches(conn, w) {
             return Ok(Some(w));
         }
