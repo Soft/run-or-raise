@@ -147,8 +147,11 @@ fn test_match_() {
 fn test_cond_or() {
     let cond = condition("class = \"Firefox\" && name = \"Emacs\" && role = \"browser\"");
     println!("{:#?}", cond);
+    assert!(cond.is_done());
     let cond = condition("class = \"Firefox\" && (name = \"Emacs\" && role = \"browser\")");
     println!("{:#?}", cond);
+    assert!(cond.is_done());
     let cond = condition("( role = \"browser\" )");
     println!("{:#?}", cond);
+    assert!(cond.is_done());
 }
