@@ -2,6 +2,7 @@ extern crate xcb;
 extern crate regex;
 extern crate encoding;
 extern crate termion;
+extern crate failure;
 
 #[macro_use]
 extern crate nom;
@@ -11,39 +12,57 @@ extern crate lazy_static;
 mod parsing;
 mod windows;
 mod conditions;
-mod utils;
 
 use std::env;
+use std::process;
 use std::process::Command;
 use std::os::unix::process::CommandExt;
 use xcb::Connection;
-use utils::{Failure, CouldFail, display_error};
+use failure::{Error, err_msg};
 
-fn exec_program(prog: &str, args: &[String]) -> ! {
-    Command::new(prog).args(args).exec();
-    display_error(&format!("Could not execute program \"{}\"", prog))
+fn exec_program(prog: &str, args: &[String]) -> Error {
+    let error = Command::new(prog).args(args).exec();
+    err_msg(format!("Could not execute program \"{}\": {}", prog, error))
 }
 
-fn main() {
+fn run() -> Result<(), Error> {
     let args: Vec<_> = env::args().collect();
     let app = &args[0];
 
     let (condition, prog, prog_args) = if args.len() >= 3 {
         (&args[1], &args[2], &args[3..])
     } else {
-        display_error(Failure::new(&format!("{} CONDITION PROGRAM [ARGS...]", app))
-                          .prefix("usage"));
+        return Err(err_msg(format!("{} CONDITION PROGRAM [ARGS...]", app)));
     };
 
-    let cond = condition.parse().unwrap_or_error("Invalid condition");
+    let cond = condition.parse()
+        .map_err(|_| err_msg("Invalid condition"))?;
 
-    let (conn, screen_num) = Connection::connect(None).unwrap_or_error("Cannot open display");
+    let (conn, screen_num) = Connection::connect(None)
+        .map_err(|_| err_msg("Cannot open display"))?;
     let screen = conn.get_setup().roots().nth(screen_num as usize).unwrap();
 
     match windows::find_matching_window(&conn, &screen, &cond)
-              .unwrap_or_error("Could not access windows") {
+        .map_err(|_| err_msg("Could not access windows"))? {
         Some(win) => windows::set_active_window(&conn, &screen, win),
-        None => exec_program(prog, prog_args),
+        None => return Err(exec_program(prog, prog_args)),
     }
     conn.flush();
+
+    Ok(())
+}
+
+fn main() {
+    use termion::{color, style};
+
+    if let Err(err) = run() {
+        let message = format!("{}{}error:{} {}",
+                              style::Bold,
+                              color::Fg(color::Red),
+                              style::Reset,
+                              err);
+        eprintln!("{}", message);
+        process::exit(1);
+    }
+
 }

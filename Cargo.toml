@@ -1,25 +1,30 @@
 [package]
 authors = ["Samuel Laurén <samuel.lauren@iki.fi>"]
+categories = ["command-line-utilities"]
+description = "Utility for launching applications or focusing their windows"
+keywords = [
+    "utility",
+    "launcher",
+    "x11",
+    "window-management",
+]
 license = "GPL-3.0"
 name = "run-or-raise"
-version = "0.2.2"
-description = "Utility for launching applications or focusing their windows"
-repository = "https://bitbucket.org/Soft/run-or-raise/"
 readme = "README.md"
-categories = ["command-line-utilities"]
-keywords = ["utility", "launcher", "x11", "window-management"]
+repository = "https://bitbucket.org/Soft/run-or-raise/"
+version = "0.2.2"
+
+[badges.travis-ci]
+repository = "Soft/run-or-raise"
 
 [dependencies]
 encoding = "0.2.33"
+failure = "0.1.1"
 lazy_static = "1.0.0"
 nom = "3.2.1"
 regex = "0.2.7"
 termion = "1.5.1"
 xcb = "0.8.2"
-
 [profile.release]
 lto = true
 panic = "abort"
-
-[badges]
-travis-ci = { repository = "Soft/run-or-raise" }
