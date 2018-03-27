@@ -13,6 +13,7 @@ name = "run-or-raise"
 readme = "README.md"
 repository = "https://bitbucket.org/Soft/run-or-raise/"
 version = "0.2.2"
+exclude = ["_config.yml"]
 
 [badges.travis-ci]
 repository = "Soft/run-or-raise"
@@ -25,6 +26,7 @@ nom = "3.2.1"
 regex = "0.2.7"
 termion = "1.5.1"
 xcb = "0.8.2"
+
 [profile.release]
 lto = true
 panic = "abort"

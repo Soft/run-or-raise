@@ -4,10 +4,10 @@
 [![Latest Version](https://img.shields.io/crates/v/run-or-raise.svg)](https://crates.io/crates/run-or-raise)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-`run-or-raise` is an utility for launching applications or focusing their
-windows if they are already running. `run-or-raise` tries to find a matching
-window using simple expressions and focus it or, if no matching windows are
-found, execute a specified program.
+`run-or-raise` is a utility for launching applications or focusing their windows
+if they are already running. `run-or-raise` tries to find a matching window
+using simple expressions and focus it or, if no matching windows are found,
+execute a specified program.
 
 This can be useful when combined with a tiling window manager such as
 [i3](https://i3wm.org) or a general purpose keyboard shortcut manager such as
@@ -90,18 +90,24 @@ run-or-raise 'name ~ ".*Firefox$"' firefox
 # Conditions can also be combined to create more complex ones.
 # Match windows where the window role is browser and the class is not Emacs
 # or any window where the title doesn't contain one or more digits
+#
+# This is getting silly
 run-or-raise '! name ~ ".*\d+.*" || role = "browser" && ! class = "Emacs"' urxvt
 ```
 
 ## Integration with External Tools
 
+`run-or-raise` can be combined with just about any tool that allows executing
+arbitrary commands in response to key events. Bellow are some hints about
+configuring `run-or-raise` to work with various applications:
+
 ### xbindkeys Keyboard Shortcut Manager
 
 [xbindkeys](http://www.nongnu.org/xbindkeys/) is an application for executing
-commands based on key events. `run-or-raise` can be combined with it to launch
-applications if they are not already running. For example, to launch or focus
-Firefox by pressing `Shift+Mod4+b`, you could use the following `xbindkeys`
-configuration:
+commands based on key events. `run-or-raise` can be combined with it to only
+launch applications if they are not already running. For example, to launch or
+focus Firefox by pressing `Shift+Mod4+b`, you could use the following
+`xbindkeys` configuration:
 
 ``` shell
 "run-or-raise 'role = \"browser\"' firefox"
@@ -119,3 +125,10 @@ i3's configuration file:
 bindsym Mod4+Shift+b exec --no-startup-id \
 	run-or-raise 'role = "browser"' firefox
 ```
+
+### KDE Custom Shortcuts
+
+[KDE](https://www.kde.org) allows binding arbitrary commands to key presses
+using [Custom Shortcuts manager](https://docs.kde.org/trunk5/en/kde-workspace/kcontrol/khotkeys/index.html#intro).
+Through this graphical configuration utility, `run-or-raise` can be used to
+launch or focus applications.
