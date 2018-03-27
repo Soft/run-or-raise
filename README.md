@@ -38,7 +38,7 @@ library to be installed.
 
 ## Usage
 
-``` shell
+``` text
 run-or-raise CONDITION PROGRAM [ARGS...]
 ```
 

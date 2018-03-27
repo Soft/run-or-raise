@@ -11,8 +11,9 @@ keywords = [
 license = "GPL-3.0"
 name = "run-or-raise"
 readme = "README.md"
-repository = "https://bitbucket.org/Soft/run-or-raise/"
-version = "0.2.2"
+homepage = "https://soft.github.io/run-or-raise/"
+repository = "https://github.com/Soft/run-or-raise"
+version = "0.3.0"
 exclude = ["_config.yml"]
 
 [badges.travis-ci]
