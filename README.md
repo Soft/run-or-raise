@@ -7,9 +7,9 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 `run-or-raise` is a utility for launching applications or focusing their windows
-if they are already running. `run-or-raise` tries to find a matching window
-using simple expressions and focus it or, if no matching windows are found,
-execute a specified program.
+if they are already running. `run-or-raise` tries to find a window that matches
+a specified criteria and focus it or, if no matching window is found, execute a
+specified program.
 
 This can be useful when combined with a tiling window manager such as
 [i3](https://i3wm.org) or a general purpose keyboard shortcut manager such as
@@ -44,7 +44,8 @@ run-or-raise CONDITION PROGRAM [ARGS...]
 
 When invoked, `run-or-raise` matches existing windows against `CONDITION`. If a
 matching window is found, it is focused. If none of the windows fulfill the
-criteria, `run-or-raise` executes `PROGRAM` passing any `ARGS` to it.
+criteria, `run-or-raise` executes `PROGRAM` passing any `ARGS` to it as
+arguments.
 
 ## Conditions
 
@@ -85,14 +86,15 @@ various ways:
 # Launch or focus emacs
 run-or-raise 'class = "Emacs"' emacs
 
-# You can also use regular expressions for matching
+# You can also use regular expressions for matching.
 # Match windows with title ending with the string "Firefox"
 run-or-raise 'name ~ ".*Firefox$"' firefox
 
-# Conditions can also be combined to create more complex ones.
-# Match windows where the window role is browser and the class is not Emacs
-# or any window where the title doesn't contain one or more digits
-#
+# You can combine multiple comparisons with logical operators.
+# Match windows with the role "browser" that do not have the class "Chromium".
+run-or-raise 'role = "browser" && ! class = "Chromium"' firefox
+
+# Even more complex conditions are possible.
 # This is getting silly
 run-or-raise '! name ~ ".*\d+.*" || role = "browser" && ! class = "Emacs"' urxvt
 ```

@@ -43,10 +43,9 @@ run-or-raise 'class = "Emacs"' emacs
 # Match windows with title ending with the string "Firefox"
 run-or-raise 'name ~ ".*Firefox$"' firefox
 
-# Conditions can also be combined to create more complex ones.
-# Match windows where the window role is browser and the class is not Emacs
-# or any window where the title does not contain one or more digits
-run-or-raise '! name ~ ".*\\d+.*" || role = "browser" && ! class = "Emacs"' urxvt
+# You can combine multiple comparisons with logical operators.
+# Match windows with the role browser that do not have the class Chromium.
+run-or-raise 'role = "browser" && ! class = "Chromium"' firefox
 .RE
 .fi
 
