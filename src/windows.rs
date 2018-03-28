@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use encoding::{Encoding, DecoderTrap};
 use encoding::all::ISO_8859_1;
 use conditions::Condition;
+use failure::{Error, err_msg};
 
 const XCB_EWMH_CLIENT_SOURCE_TYPE_OTHER: u32 = 2;
 
@@ -38,19 +39,31 @@ impl<'a> Iterator for WindowTreeIter<'a> {
     }
 }
 
-pub fn get_atom(conn: &Connection, atom: &'static str) -> Atom {
+pub fn get_atom(conn: &Connection, atom: &'static str)
+                -> Result<Atom, Error> {
+    fn err<T>(_: T) -> Error {
+        err_msg("Failed to access atom map")
+    }
     let current = {
-        INTERNED_ATOMS.lock().unwrap().get(atom).cloned()
+        INTERNED_ATOMS.lock()
+            .map_err(err)?
+            .get(atom)
+            .cloned()
     };
-    current.unwrap_or_else(|| {
-        let interned = xcb::intern_atom(conn, true, atom).get_reply().unwrap().atom();
-        INTERNED_ATOMS.lock().unwrap().insert(atom, interned);
-        interned
-    })
+    match current {
+        Some(current) => Ok(current),
+        None => {
+            let interned = xcb::intern_atom(conn, true, atom).get_reply()?.atom();
+            INTERNED_ATOMS.lock()
+                .map_err(err)?
+                .insert(atom, interned);
+            Ok(interned)
+        }
+    }
 }
 
-pub fn set_active_window(conn: &Connection, screen: &Screen, win: Window) {
-    let net_active_window = get_atom(conn, "_NET_ACTIVE_WINDOW");
+pub fn set_active_window(conn: &Connection, screen: &Screen, win: Window) -> Result<(), Error> {
+    let net_active_window = get_atom(conn, "_NET_ACTIVE_WINDOW")?;
     let data = xcb::ClientMessageData::from_data32([XCB_EWMH_CLIENT_SOURCE_TYPE_OTHER,
                                                     xcb::CURRENT_TIME,
                                                     xcb::WINDOW_NONE,
@@ -61,10 +74,12 @@ pub fn set_active_window(conn: &Connection, screen: &Screen, win: Window) {
                     false,
                     screen.root(),
                     xcb::EVENT_MASK_SUBSTRUCTURE_NOTIFY | xcb::EVENT_MASK_SUBSTRUCTURE_REDIRECT,
-                    &ev);
+                    &ev)
+        .request_check()?;
+    Ok(())
 }
 
-pub fn get_string_property(conn: &Connection, window: Window, prop: Atom) -> Option<String> {
+pub fn get_string_property(conn: &Connection, window: Window, prop: Atom) -> Result<Option<String>, Error> {
     let reply = match xcb::get_property(conn,
                                         false,
                                         window,
@@ -74,41 +89,42 @@ pub fn get_string_property(conn: &Connection, window: Window, prop: Atom) -> Opt
                                         u32::max_value())
                           .get_reply() {
         Ok(r) => r,
-        _ => return None,
+        Err(_) => return Ok(None),
     };
-    let atom_utf8_string = get_atom(conn, "UTF8_STRING");
+    let atom_utf8_string = get_atom(conn, "UTF8_STRING")?;
     let reply_type = reply.type_();
     if reply_type == xcb::ATOM_STRING {
-        ISO_8859_1.decode(reply.value(), DecoderTrap::Strict).ok()
+        // Maybe we should not convert these to Options
+        Ok(ISO_8859_1.decode(reply.value(), DecoderTrap::Strict).ok())
     } else if reply_type == atom_utf8_string {
-        String::from_utf8(reply.value().to_vec()).ok()
+        Ok(String::from_utf8(reply.value().to_vec()).ok())
     } else {
-        None
+        Ok(None)
     }
 }
 
-pub fn is_regular_window(conn: &Connection, window: Window) -> bool {
-    let atom_wm_state = get_atom(conn, "WM_STATE");
-    xcb::get_property(conn,
-                      false,
-                      window,
-                      atom_wm_state,
-                      atom_wm_state,
-                      0,
-                      u32::max_value())
-        .get_reply()
-        .map(|state| state.value_len() > 0)
-        .unwrap_or(false)
+pub fn is_regular_window(conn: &Connection, window: Window) -> Result<bool, Error> {
+    let atom_wm_state = get_atom(conn, "WM_STATE")?;
+    Ok(xcb::get_property(conn,
+                         false,
+                         window,
+                         atom_wm_state,
+                         atom_wm_state,
+                         0,
+                         u32::max_value())
+       .get_reply()
+       .map(|state| state.value_len() > 0)
+       .unwrap_or(false))
 }
 
 pub fn find_matching_window(conn: &Connection,
                             screen: &Screen,
                             cond: &Condition)
-                            -> Result<Option<Window>, xcb::GenericError> {
+                            -> Result<Option<Window>, Error> {
     let wins = WindowTreeIter::new(&conn, screen.root())?;
     for w in wins {
         let w = w?;
-        if is_regular_window(conn, w) && cond.matches(conn, w) {
+        if is_regular_window(conn, w)? && cond.matches(conn, w)? {
             return Ok(Some(w));
         }
     }

@@ -42,9 +42,8 @@ fn run() -> Result<(), Error> {
         .map_err(|_| err_msg("Cannot open display"))?;
     let screen = conn.get_setup().roots().nth(screen_num as usize).unwrap();
 
-    match windows::find_matching_window(&conn, &screen, &cond)
-        .map_err(|_| err_msg("Could not access windows"))? {
-        Some(win) => windows::set_active_window(&conn, &screen, win),
+    match windows::find_matching_window(&conn, &screen, &cond)? {
+        Some(win) => windows::set_active_window(&conn, &screen, win)?,
         None => return Err(exec_program(prog, prog_args)),
     }
     conn.flush();

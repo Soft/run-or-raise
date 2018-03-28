@@ -51,7 +51,7 @@ arguments.
 
 Conditions select windows based on their properties. In X11, each window can
 have any number of properties associated with them. Examples of window
-properties include *name* (typically what is visible in windows title bar),
+properties include *name* (typically what is visible in window's title bar),
 *class* (an identifier that can be usually used to select windows of a
 particular applications) and *role* (a representation of window's logical role,
 eg. a web browser). The [xprop](https://www.x.org/releases/X11R7.5/doc/man/man1/xprop.1.html)
