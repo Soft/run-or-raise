@@ -34,7 +34,17 @@ $ cargo install run-or-raise
 ```
 
 Compiling and running `run-or-raise` requires [libxcb](https://xcb.freedesktop.org)
-library to be installed.
+library to be installed. To get the latest development version of
+`run-or-raise`, you can direct cargo to install from the git repository:
+
+``` shell
+$ cargo install --git 'https://github.com/Soft/run-or-raise.git'
+```
+
+However, just downloading the application binary or installing with cargo will
+not install program’s man page. To also get the manual pages installed, invoke
+`make install` in the project directory. By default, the install script will
+place the files under `/usr/local/` hierarchy.
 
 ## Usage
 
