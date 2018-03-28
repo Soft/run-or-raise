@@ -38,8 +38,7 @@ fn run() -> Result<(), Error> {
     let cond = condition.parse()
         .map_err(|_| err_msg("Invalid condition"))?;
 
-    let (conn, screen_num) = Connection::connect(None)
-        .map_err(|_| err_msg("Cannot open display"))?;
+    let (conn, screen_num) = Connection::connect(None)?;
     let screen = conn.get_setup().roots().nth(screen_num as usize).unwrap();
 
     match windows::find_matching_window(&conn, &screen, &cond)? {

@@ -1,4 +1,4 @@
-use nom::{IResult, space};
+use nom::{IError, space};
 use std::str::FromStr;
 use regex::Regex;
 
@@ -87,13 +87,10 @@ named!(cond_parens<&str, Condition>,
 named!(cond_pure<&str, Condition>, map!(match_, Condition::Pure));
 
 impl FromStr for Condition {
-    type Err = (); // Bad
+    type Err = IError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match condition(s) {
-            IResult::Done(_, cond) => Ok(cond),
-            _ => Err(()),
-        }
+        condition(s).to_full_result()
     }
 }
 
