@@ -13,7 +13,7 @@ name = "run-or-raise"
 readme = "README.md"
 homepage = "https://soft.github.io/run-or-raise/"
 repository = "https://github.com/Soft/run-or-raise"
-version = "0.3.0"
+version = "0.3.1"
 exclude = ["_config.yml"]
 
 [badges.travis-ci]
