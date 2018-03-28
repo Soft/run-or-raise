@@ -55,7 +55,7 @@ properties include *name* (typically what is visible in windows title bar),
 *class* (an identifier that can be usually used to select windows of a
 particular applications) and *role* (a representation of window's logical role,
 eg. a web browser). The [xprop](https://www.x.org/releases/X11R7.5/doc/man/man1/xprop.1.html)
-command can be used to inspect windows and their properties.
+utility can be used to inspect windows and their properties.
 
 The simplest possible window matching condition simply compares one of the
 properties with a value:
@@ -68,7 +68,7 @@ This would find and focus a window with the title “Spotify” or run the comma
 `spotify`.
 
 Conditions support two comparison operators: `=` for exact equality comparison
-with a string literal and '~' work comparing with a
+with a string literal and `~` work comparing with a
 [regular expression](https://en.wikipedia.org/wiki/Regular_expression).
 
 Comparisons can be combined using logical operators: `&&` for logical *AND*,
