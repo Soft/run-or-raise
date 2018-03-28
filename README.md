@@ -55,7 +55,7 @@ properties include *name* (typically what is visible in window's title bar),
 *class* (an identifier that can be usually used to select windows of a
 particular applications) and *role* (a representation of window's logical role,
 eg. a web browser). The [xprop](https://www.x.org/releases/X11R7.5/doc/man/man1/xprop.1.html)
-command can be used to inspect windows and their properties.
+utility can be used to inspect windows and their properties.
 
 The simplest possible window matching condition simply compares one of the
 properties with a value:
@@ -68,7 +68,7 @@ This would find and focus a window with the title “Spotify” or run the comma
 `spotify`.
 
 Conditions support two comparison operators: `=` for exact equality comparison
-with a string literal and '~' work comparing with a
+with a string literal and `~` work comparing with a
 [regular expression](https://en.wikipedia.org/wiki/Regular_expression).
 
 Comparisons can be combined using logical operators: `&&` for logical *AND*,
@@ -110,7 +110,7 @@ configuring `run-or-raise` to work with various applications:
 [xbindkeys](http://www.nongnu.org/xbindkeys/) is an application for executing
 commands based on key events. `run-or-raise` can be combined with it to only
 launch applications if they are not already running. For example, to launch or
-focus Firefox by pressing `Shift+Mod4+b`, you could use the following
+focus Firefox by pressing `Shift+Mod4+b`, one could use the following
 `xbindkeys` configuration:
 
 ``` shell
@@ -136,3 +136,25 @@ bindsym Mod4+Shift+b exec --no-startup-id \
 using [Custom Shortcuts manager](https://docs.kde.org/trunk5/en/kde-workspace/kcontrol/khotkeys/index.html#intro).
 Through this graphical configuration utility, `run-or-raise` can be used to
 launch or focus applications.
+
+### Desktop Entries
+
+[Desktop Entries](https://developer.gnome.org/integration-guide/stable/desktop-files.html.en)
+are used to define shortcuts that appear in application menus and launchers. In
+addition to application name and icon they also define what commands should be
+executed when an application is launched. `run-or-raise` can be used as a part
+of a desktop file to mandate that only a single instance of a particular
+application should be started. For example, Spotify on Linux does not currently
+enforce that only a single instance of the application can be launched, this is
+annoying since having multiple audio players open is rarely what one wants.
+Integrating `run-or-raise` into a desktop file means replacing the `Exec` key
+with a one that invokes `run-or-raise` to check if the application is already
+running:
+
+``` desktop
+[Desktop Entry]
+Name=Spotify
+Exec=run-or-raise 'class = "Spotify"' spotify %U
+...
+```
+
