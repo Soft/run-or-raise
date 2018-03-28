@@ -195,7 +195,7 @@ dependencies = [
 
 [[package]]
 name = "run-or-raise"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "encoding 0.2.33 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",

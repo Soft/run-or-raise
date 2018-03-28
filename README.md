@@ -7,9 +7,9 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 `run-or-raise` is a utility for launching applications or focusing their windows
-if they are already running. `run-or-raise` tries to find a window that matches
-a specified criteria and focus it or, if no matching window is found, execute a
-specified program.
+if they are already running. When invoked, `run-or-raise` tries to find a window
+that matches a specified criteria and focus it or, if no matching window is
+found, execute a specified program.
 
 This can be useful when combined with a tiling window manager such as
 [i3](https://i3wm.org) or a general purpose keyboard shortcut manager such as
@@ -68,8 +68,8 @@ This would find and focus a window with the title “Spotify” or run the comma
 `spotify`.
 
 Conditions support two comparison operators: `=` for exact equality comparison
-with a string literal and `~` work comparing with a
-[regular expression](https://en.wikipedia.org/wiki/Regular_expression).
+with a string literal and `~` for comparing using a [regular
+expression](https://en.wikipedia.org/wiki/Regular_expression).
 
 Comparisons can be combined using logical operators: `&&` for logical *AND*,
 `||` for logical *OR*, and `!` for logical *NOT*. Operators in matching
