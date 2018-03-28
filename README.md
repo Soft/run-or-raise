@@ -110,7 +110,7 @@ configuring `run-or-raise` to work with various applications:
 [xbindkeys](http://www.nongnu.org/xbindkeys/) is an application for executing
 commands based on key events. `run-or-raise` can be combined with it to only
 launch applications if they are not already running. For example, to launch or
-focus Firefox by pressing `Shift+Mod4+b`, you could use the following
+focus Firefox by pressing `Shift+Mod4+b`, one could use the following
 `xbindkeys` configuration:
 
 ``` shell
@@ -136,3 +136,25 @@ bindsym Mod4+Shift+b exec --no-startup-id \
 using [Custom Shortcuts manager](https://docs.kde.org/trunk5/en/kde-workspace/kcontrol/khotkeys/index.html#intro).
 Through this graphical configuration utility, `run-or-raise` can be used to
 launch or focus applications.
+
+### Desktop Entries
+
+[Desktop Entries](https://developer.gnome.org/integration-guide/stable/desktop-files.html.en)
+are used to define shortcuts that appear in application menus and launchers. In
+addition to application name and icon they also define what commands should be
+executed when an application is launched. `run-or-raise` can be used as a part
+of a desktop file to mandate that only a single instance of a particular
+application should be started. For example, Spotify on Linux does not currently
+enforce that only a single instance of the application can be launched, this is
+annoying since having multiple audio players open is rarely what one wants.
+Integrating `run-or-raise` into a desktop file means replacing the `Exec` key
+with a one that invokes `run-or-raise` to check if the application is already
+running:
+
+``` desktop
+[Desktop Entry]
+Name=Spotify
+Exec=run-or-raise 'class = "Spotify"' spotify %U
+...
+```
+
