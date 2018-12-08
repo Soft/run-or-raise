@@ -1,8 +1,8 @@
-use nom::{IError, space};
+use nom::*;
 use std::str::FromStr;
 use regex::Regex;
 
-use conditions::*;
+use crate::conditions::*;
 
 named!(property<&str, Property>,
        alt_complete!(value!(Property::Class, tag_s!("class"))

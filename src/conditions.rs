@@ -2,7 +2,7 @@ use regex::Regex;
 use xcb::{self, Connection, Window};
 use failure::{Error, err_msg};
 
-use windows::{get_string_property, get_atom};
+use crate::windows::{get_string_property, get_atom};
 
 #[derive(Debug,PartialEq)]
 pub enum Property {

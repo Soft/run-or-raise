@@ -3,8 +3,9 @@ use std::sync::Mutex;
 use std::collections::HashMap;
 use encoding::{Encoding, DecoderTrap};
 use encoding::all::ISO_8859_1;
-use conditions::Condition;
+use crate::conditions::Condition;
 use failure::{Error, err_msg};
+use lazy_static::*;
 
 const XCB_EWMH_CLIENT_SOURCE_TYPE_OTHER: u32 = 2;
 
@@ -21,7 +22,7 @@ impl<'a> WindowTreeIter<'a> {
     fn new(conn: &'a Connection, win: Window) -> Result<WindowTreeIter<'a>, xcb::GenericError> {
         let reply = xcb::query_tree(conn, win).get_reply()?;
         Ok(WindowTreeIter {
-            conn: conn,
+            conn,
             stack: reply.children().to_owned(),
         })
     }

@@ -1,14 +1,3 @@
-extern crate xcb;
-extern crate regex;
-extern crate encoding;
-extern crate termion;
-extern crate failure;
-
-#[macro_use]
-extern crate nom;
-#[macro_use]
-extern crate lazy_static;
-
 mod parsing;
 mod windows;
 mod conditions;
