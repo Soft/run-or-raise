@@ -13,7 +13,7 @@ name = "run-or-raise"
 readme = "README.md"
 homepage = "https://soft.github.io/run-or-raise/"
 repository = "https://github.com/Soft/run-or-raise"
-version = "0.3.1"
+version = "0.3.2"
 exclude = ["_config.yml"]
 edition = "2018"
 

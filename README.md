@@ -5,6 +5,7 @@
 [![GitHub release](https://img.shields.io/github/release/Soft/run-or-raise.svg)](https://github.com/Soft/run-or-raise/releases)
 [![dependency status](https://deps.rs/repo/github/soft/run-or-raise/status.svg)](https://deps.rs/repo/github/soft/run-or-raise)
 [![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/crate/run-or-raise)
+[![AUR version](https://img.shields.io/aur/version/run-or-raise.svg)](https://aur.archlinux.org/packages/run-or-raise/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 `run-or-raise` is a utility for launching applications or focusing their windows
