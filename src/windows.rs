@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use encoding::{Encoding, DecoderTrap};
 use encoding::all::ISO_8859_1;
 use crate::conditions::Condition;
-use failure::{Error, err_msg};
+use anyhow::{Result, Error, anyhow};
 use lazy_static::*;
 
 const XCB_EWMH_CLIENT_SOURCE_TYPE_OTHER: u32 = 2;
@@ -41,9 +41,9 @@ impl<'a> Iterator for WindowTreeIter<'a> {
 }
 
 pub fn get_atom(conn: &Connection, atom: &'static str)
-                -> Result<Atom, Error> {
+                -> Result<Atom> {
     fn err<T>(_: T) -> Error {
-        err_msg("Failed to access atom map")
+        anyhow!("Failed to access atom map")
     }
     let current = {
         INTERNED_ATOMS.lock()
