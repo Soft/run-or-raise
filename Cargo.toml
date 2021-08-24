@@ -24,9 +24,8 @@ repository = "Soft/run-or-raise"
 encoding = "0.2"
 anyhow = "1"
 lazy_static = "1.4"
-nom = "3.2.1"
+nom = "7"
 regex = "1.5"
-termion = "1.5"
 xcb = "0.9"
 
 [profile.release]

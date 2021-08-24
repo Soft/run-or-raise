@@ -1,17 +1,17 @@
+mod conditions;
 mod parsing;
 mod windows;
-mod conditions;
 
+use anyhow::{bail, Error, Result};
 use std::env;
+use std::os::unix::process::CommandExt;
 use std::process;
 use std::process::Command;
-use std::os::unix::process::CommandExt;
 use xcb::Connection;
-use anyhow::{Result, Error, anyhow};
 
 fn exec_program(prog: &str, args: &[String]) -> Error {
     let error = Command::new(prog).args(args).exec();
-    anyhow!("Could not execute program \"{}\": {}", prog, error)
+    Error::new(error).context("Executing program failed")
 }
 
 fn run() -> Result<()> {
@@ -21,11 +21,10 @@ fn run() -> Result<()> {
     let (condition, prog, prog_args) = if args.len() >= 3 {
         (&args[1], &args[2], &args[3..])
     } else {
-        return Err(anyhow!("{} CONDITION PROGRAM [ARGS...]", app));
+        bail!("{} CONDITION PROGRAM [ARGS...]", app);
     };
 
-    let cond = condition.parse()
-        .map_err(|_| anyhow!("Invalid condition"))?;
+    let cond = condition.parse()?;
 
     let (conn, screen_num) = Connection::connect(None)?;
     let screen = conn.get_setup().roots().nth(screen_num as usize).unwrap();
@@ -40,16 +39,11 @@ fn run() -> Result<()> {
 }
 
 fn main() {
-    use termion::{color, style};
-
     if let Err(err) = run() {
-        let message = format!("{}{}error:{} {}",
-                              style::Bold,
-                              color::Fg(color::Red),
-                              style::Reset,
-                              err);
-        eprintln!("{}", message);
+        eprintln!("{}: {}", env!("CARGO_BIN_NAME"), err);
+        err.chain()
+            .skip(1)
+            .for_each(|cause| eprintln!("caused by:\n{}", cause));
         process::exit(1);
     }
-
 }

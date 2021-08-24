@@ -1,10 +1,10 @@
+use anyhow::{anyhow, Result};
 use regex::Regex;
 use xcb::{self, Connection, Window};
-use anyhow::{Result, anyhow};
 
-use crate::windows::{get_string_property, get_atom};
+use crate::windows::{get_atom, get_string_property};
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Property {
     Class,
     Name,
@@ -35,36 +35,36 @@ impl Property {
     pub fn from_window(&self, conn: &Connection, win: Window) -> Result<Option<String>> {
         match *self {
             Property::Class => {
-                get_string_property(conn, win, xcb::ATOM_WM_CLASS)?
-                .map_or(Ok(None), |p| p.split('\u{0}')
+                get_string_property(conn, win, xcb::ATOM_WM_CLASS)?.map_or(Ok(None), |p| {
+                    p.split('\u{0}')
                         .nth(1)
                         .ok_or_else(|| anyhow!("Invalid class defintion"))
-                        .map(|s| Some(s.to_owned())))
+                        .map(|s| Some(s.to_owned()))
+                })
             }
-            Property::Name => {
-                get_string_property(conn, win, get_atom(conn, "_NET_WM_NAME")?)?
-                .map_or_else(|| get_string_property(conn, win, xcb::ATOM_WM_NAME), |v| Ok(Some(v)))
-            }
-            Property::Role => get_string_property(conn, win, get_atom(conn, "WM_WINDOW_ROLE")?)
+            Property::Name => get_string_property(conn, win, get_atom(conn, "_NET_WM_NAME")?)?
+                .map_or_else(
+                    || get_string_property(conn, win, xcb::ATOM_WM_NAME),
+                    |v| Ok(Some(v)),
+                ),
+            Property::Role => get_string_property(conn, win, get_atom(conn, "WM_WINDOW_ROLE")?),
         }
     }
 }
 
 impl Match {
     pub fn matches(&self, conn: &Connection, win: Window) -> Result<bool> {
-        Ok(self.prop
+        Ok(self
+            .prop
             .from_window(conn, win)?
-            .map(|p| {
-                match self.op {
-                    Operator::Regex(ref pattern) => pattern.is_match(&p),
-                    Operator::Equal(ref value) => value == &p,
-                }
+            .map(|p| match self.op {
+                Operator::Regex(ref pattern) => pattern.is_match(&p),
+                Operator::Equal(ref value) => value == &p,
             })
             .unwrap_or(false))
     }
 }
 
-// TODO: Avoid multiple lookups
 impl Condition {
     pub fn matches(&self, conn: &Connection, win: Window) -> Result<bool> {
         Ok(match *self {
