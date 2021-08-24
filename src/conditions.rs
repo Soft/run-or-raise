@@ -1,6 +1,6 @@
 use regex::Regex;
 use xcb::{self, Connection, Window};
-use failure::{Error, err_msg};
+use anyhow::{Result, anyhow};
 
 use crate::windows::{get_string_property, get_atom};
 
@@ -32,13 +32,13 @@ pub enum Condition {
 }
 
 impl Property {
-    pub fn from_window(&self, conn: &Connection, win: Window) -> Result<Option<String>, Error> {
+    pub fn from_window(&self, conn: &Connection, win: Window) -> Result<Option<String>> {
         match *self {
             Property::Class => {
                 get_string_property(conn, win, xcb::ATOM_WM_CLASS)?
                 .map_or(Ok(None), |p| p.split('\u{0}')
                         .nth(1)
-                        .ok_or_else(|| err_msg("Invalid class defintion"))
+                        .ok_or_else(|| anyhow!("Invalid class defintion"))
                         .map(|s| Some(s.to_owned())))
             }
             Property::Name => {
@@ -51,7 +51,7 @@ impl Property {
 }
 
 impl Match {
-    pub fn matches(&self, conn: &Connection, win: Window) -> Result<bool, Error> {
+    pub fn matches(&self, conn: &Connection, win: Window) -> Result<bool> {
         Ok(self.prop
             .from_window(conn, win)?
             .map(|p| {
@@ -66,7 +66,7 @@ impl Match {
 
 // TODO: Avoid multiple lookups
 impl Condition {
-    pub fn matches(&self, conn: &Connection, win: Window) -> Result<bool, Error> {
+    pub fn matches(&self, conn: &Connection, win: Window) -> Result<bool> {
         Ok(match *self {
             Condition::Pure(ref m) => m.matches(conn, win)?,
             Condition::And(ref a, ref b) => a.matches(conn, win)? && b.matches(conn, win)?,
