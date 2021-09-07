@@ -4,7 +4,6 @@
 [![Latest Version](https://img.shields.io/crates/v/run-or-raise.svg)](https://crates.io/crates/run-or-raise)
 [![GitHub release](https://img.shields.io/github/release/Soft/run-or-raise.svg)](https://github.com/Soft/run-or-raise/releases)
 [![dependency status](https://deps.rs/repo/github/soft/run-or-raise/status.svg)](https://deps.rs/repo/github/soft/run-or-raise)
-[![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/crate/run-or-raise)
 [![AUR version](https://img.shields.io/aur/version/run-or-raise.svg)](https://aur.archlinux.org/packages/run-or-raise/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -17,36 +16,32 @@ This can be useful when combined with a tiling window manager such as
 [i3](https://i3wm.org) or a general purpose keyboard shortcut manager such as
 [xbindkeys](http://www.nongnu.org/xbindkeys/) that allow binding arbitrary
 commands to keybindings. In such setup, one might use `run-or-raise` to, for
-example, launch or focus a web browser with a single key.
+example, launch or focus a web browser with a single key press.
 
 `run-or-raise` is designed to work with X11 based Linux systems.
 
 ## Installation
 
-The easiest way to obtain the latest version of `run-or-raise` is to download a
-precompiled, statically-linked, program binary from [GitHub releases
-page](https://github.com/Soft/run-or-raise/releases). These binaries should work
-on most recent Linux systems without any additional dependencies.
-
-Alternatively, `run-or-raise` can be easily installed from the source using
+`run-or-raise` can be installed using
 [cargo](https://doc.rust-lang.org/cargo/index.html):
 
 ``` shell
-$ cargo install run-or-raise
+cargo install run-or-raise
 ```
 
 Compiling and running `run-or-raise` requires [libxcb](https://xcb.freedesktop.org)
-library to be installed. To get the latest development version of
-`run-or-raise`, you can direct cargo to install from the git repository:
+library to be installed.
+
+To get the latest development version of `run-or-raise`, you can direct cargo to
+install from the git repository:
 
 ``` shell
-$ cargo install --git 'https://github.com/Soft/run-or-raise.git'
+cargo install --git 'https://github.com/Soft/run-or-raise.git'
 ```
 
-However, just downloading the application binary or installing with cargo will
-not install program’s man page. To also get the manual pages installed, invoke
-`make install` in the project directory. By default, the install script will
-place the files under `/usr/local/` hierarchy.
+Note that cargo will not install man pages. To install `run-or-raise` along with
+its manual invoke `make install` in the project directory. By default, the
+installation script will place the files under `/usr/local/` hierarchy.
 
 ## Usage
 
@@ -55,7 +50,7 @@ run-or-raise CONDITION PROGRAM [ARGS...]
 ```
 
 When invoked, `run-or-raise` matches existing windows against `CONDITION`. If a
-matching window is found, it is focused. If none of the windows fulfill the
+matching window is found, it is focused. If none of the windows match the
 criteria, `run-or-raise` executes `PROGRAM` passing any `ARGS` to it as
 arguments.
 

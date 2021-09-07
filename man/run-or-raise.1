@@ -1,27 +1,20 @@
-.TH RUN-OR-RAISE 1 2018
-
+.TH RUN-OR-RAISE 1 2021
 .SH NAME
 run\-or\-raise \- utility for launching applications or focusing their windows
-
 .SH SYNOPSIS
-
 .B run\-or\-raise
 \fICONDITION PROGRAM\fR [\fIARGS\fR...]
-
 .SH DESCRIPTION
-
 \fBrun\-or\-raise\fR is a utility for launching applications or focusing their
 windows. When invoked, \fBrun\-or\-raise\fR matches existing windows against
 \fICONDITION\fR. If a matching window is found, it is focused. If none of the
-windows fulfill the criteria, \fBrun\-or\-raise\fR executes \fIPROGRAM\fR
-passing any \fIARGS\fR to it as arguments.
-
+windows match the criteria, \fBrun\-or\-raise\fR executes \fIPROGRAM\fR passing
+any \fIARGS\fR to it as arguments.
 .SH CONDITIONS
-
 Conditions select windows based on their properties. Conditions support two
 comparison operators: \fB=\fR for exact equality comparison with a string
 literal and \fB~\fR work comparing with a regular expression.
-
+.P
 Comparisons can be combined using logical operators: \fB&&\fR for logical
 \fIAND\fR, \fB||\fR for logical \fIOR\fR, and \fB!\fR for logical \fINOT\fR.
 Operators in matching expressions are left-associative and \fB!\fR (not) binds
@@ -30,10 +23,10 @@ Possible properties are \fBclass\fR, \fBname\fR, and \fBrole\fR. Additionally,
 parentheses can be used to alter evaluation order. Strings and regular
 expressions are written inside double quotes. If multiple windows match the
 criteria, the first matching window is selected.
-
+.P
 Bellow are some examples of how conditions can be used to select windows in
 various ways:
-
+.P
 .nf
 .RS
 # Launch or focus emacs
@@ -48,6 +41,5 @@ run-or-raise 'name ~ ".*Firefox$"' firefox
 run-or-raise 'role = "browser" && ! class = "Chromium"' firefox
 .RE
 .fi
-
 .SH AUTHORS
 Samuel Laurén <samuel.lauren@iki.fi>
