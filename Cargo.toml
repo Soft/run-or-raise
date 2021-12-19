@@ -13,9 +13,9 @@ name = "run-or-raise"
 readme = "README.md"
 homepage = "https://soft.github.io/run-or-raise/"
 repository = "https://github.com/Soft/run-or-raise"
-version = "0.3.3"
+version = "0.3.4"
 exclude = ["_config.yml"]
-edition = "2018"
+edition = "2021"
 
 [badges.travis-ci]
 repository = "Soft/run-or-raise"
@@ -26,7 +26,7 @@ anyhow = "1"
 lazy_static = "1.4"
 nom = "7"
 regex = "1.5"
-xcb = "0.9"
+xcb = "0.10"
 
 [profile.release]
 lto = true

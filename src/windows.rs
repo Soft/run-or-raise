@@ -19,7 +19,7 @@ pub struct WindowTreeIter<'a> {
 }
 
 impl<'a> WindowTreeIter<'a> {
-    fn new(conn: &'a Connection, win: Window) -> Result<WindowTreeIter<'a>, xcb::GenericError> {
+    fn new(conn: &'a Connection, win: Window) -> Result<WindowTreeIter<'a>, xcb::ReplyError> {
         let reply = xcb::query_tree(conn, win).get_reply()?;
         Ok(WindowTreeIter {
             conn,
@@ -29,7 +29,7 @@ impl<'a> WindowTreeIter<'a> {
 }
 
 impl<'a> Iterator for WindowTreeIter<'a> {
-    type Item = Result<Window, xcb::GenericError>;
+    type Item = Result<Window, xcb::ReplyError>;
     fn next(&mut self) -> Option<Self::Item> {
         self.stack.pop().map(|top| {
             xcb::query_tree(self.conn, top).get_reply().map(|reply| {
