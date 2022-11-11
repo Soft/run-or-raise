@@ -33,9 +33,7 @@ fn run() -> Result<()> {
         Some(win) => windows::set_active_window(&conn, &screen, win)?,
         None => return Err(exec_program(prog, prog_args)),
     }
-    conn.flush();
-
-    Ok(())
+    conn.flush().map_err(Into::into)
 }
 
 fn main() {
