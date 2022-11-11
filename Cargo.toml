@@ -23,10 +23,10 @@ repository = "Soft/run-or-raise"
 [dependencies]
 encoding = "0.2"
 anyhow = "1"
-lazy_static = "1.4"
+lazy_static = "1"
 nom = "7"
-regex = "1.5"
-xcb = "0.10"
+regex = "1"
+xcb = "1"
 
 [profile.release]
 lto = true
